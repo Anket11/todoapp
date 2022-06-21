@@ -77,3 +77,7 @@ li {
   position: relative;
   padding: 0.5rem;
 }
+ul {
+  padding-left: 0px;
+  list-style-type: none;
+ }
