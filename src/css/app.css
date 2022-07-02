@@ -1,0 +1,26 @@
+body {
+    background-color: #ffeaa7;
+    padding: 1rem;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    color: hsl(198, 1%, 29%);
+    
+    text-align: center;
+  }
+  .boardContainer{
+    display: flex;
+    max-width: 500px;
+    min-width: 250px;
+  }
+  .newList{
+    min-width: 250px;
+  }
+  div:last-child:after{
+    content: "";
+  flex: 0 0 50px;
+  }
+  .newList Button{
+    width: 100%;
+    font-family:Arial;
+  }
