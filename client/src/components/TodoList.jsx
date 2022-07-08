@@ -1,72 +1,71 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Button, DropdownButton, Dropdown } from "react-bootstrap";
+import { Dropdown } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faXmarkSquare, faEllipsis } from "@fortawesome/free-solid-svg-icons";
-
+import { faEllipsis } from "@fortawesome/free-solid-svg-icons";
+import { addTodo, deleteList, editListName } from "../redux/listsSlice";
+import { useDispatch } from "react-redux";
 import Todo from "./Todo";
 import "../css/todolist.css";
 
 function TodoList(props) {
-
+  const dispatch = useDispatch();
   const [editing, setEditing] = useState(false);
+  const [done, setDone] = useState(false);
+
   const [title, setTitle] = useState(props.heading);
   function handleEnterHeading(event) {
-    if (event.key == "Enter") {
+    if (event.key === "Enter") {
       event.preventDefault();
       setTitle(event.target.value);
-      props.updateList(props.index, title);
+      const index = props.index;
+      dispatch(editListName({ index, title }));
       setEditing(false);
     }
   }
 
   const [inputText, setInputText] = useState("");
-  const [items, setItems] = useState([]);
   function handleChange(event) {
     const newValue = event.target.value;
     setInputText(newValue);
   }
   function handleEnter(event) {
-    if (event.key == "Enter") {
+    if (event.key === "Enter") {
       event.preventDefault();
       setInputText(event.target.value);
       addItem();
     }
   }
   function addItem() {
-    setItems((prevItems) => {
-      return [...prevItems, inputText];
-    });
+    const idx = props.index;
+    // console.log("Todo should be created with:" + inputText);
+    dispatch(addTodo({ idx, inputText }));
     setInputText("");
-  }
-  function onDelete(item) {
-    setItems(
-      items.filter((e, index) => {
-        return index !== item.index;
-      })
-    );
-    props.updateDelItems(item.content);
+    scrollToBottom();
   }
 
-  const messagesEndRef = useRef(null)
+  const messagesEndRef = useRef(null);
   const scrollToBottom = () => {
-    console.log("I got called")
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
-  useEffect(scrollToBottom, [items]);
+    // console.log("I got called")
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+  // useEffect(scrollToBottom, [props.todoList]);
 
   return (
     <div className="container">
       <div className="heading">
         {/* <h1 onClick={()=> props.updateList(props.index,"New heading")}>{props.heading}</h1> */}
 
-        {!editing ? (
+        {done? (<h1 className="list-title" onDoubleClick={() => setEditing(true)}>
+            Done Todos
+          </h1>) : 
+          !editing ? (
           <h1 className="list-title" onDoubleClick={() => setEditing(true)}>
             {props.heading}
           </h1>
         ) : (
           <input
-          autoFocus={true}
-          size={title.length}
+            autoFocus={true}
+            size={title.length}
             onKeyPress={handleEnterHeading}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -74,7 +73,7 @@ function TodoList(props) {
         )}
 
         <Dropdown>
-          <Dropdown.Toggle variant="outline-light" Transparent button id="dropdown-basic">
+          <Dropdown.Toggle variant="outline-light" id="dropdown-basic">
             <FontAwesomeIcon className="moreIcon" icon={faEllipsis} size="xl" />
           </Dropdown.Toggle>
 
@@ -82,15 +81,25 @@ function TodoList(props) {
             <Dropdown.Item
               as="button"
               onClick={() => {
-                return props.delList(props.index);
+                // console.log("Delete List");
+                dispatch(deleteList(props.index));
               }}
             >
               Delete
             </Dropdown.Item>
+            <Dropdown.Item
+              as="button"
+              onClick={() => {
+                // console.log("Delete List");
+                setDone(!done);
+              }}
+            >
+              {done ? "To-dos": "Done Todos"}
+            </Dropdown.Item>
           </Dropdown.Menu>
         </Dropdown>
       </div>
-      {!props.displayItems && (
+      {!done && (
         <div className="form">
           <input
             onChange={handleChange}
@@ -98,14 +107,14 @@ function TodoList(props) {
             type="text"
             value={inputText}
           />
-          <button className="addTodoButton" onClick={addItem}>
+          <button className="addTodoButton" onClick={() => addItem()}>
             <span>Add</span>
           </button>
         </div>
       )}
       <div className="todoitems">
         <ul>
-          {props.onlyDisplay
+          {/* {props.onlyDisplay
             ? props.displayItems.map((todoItem) => (
               <>
                 <Todo
@@ -128,7 +137,25 @@ function TodoList(props) {
                 />
                 <hr/>
               </>
-              ))}
+              ))} */}
+
+          {done ? 
+            props.doneList.map((todoItem,index) => (
+                <Todo
+                  key={index}
+                  content={todoItem}
+                  onlyDisplay={props.onlyDisplay}
+                />
+              )):
+          props.todoList.map((todoItem, index) => (
+            <Todo
+              indexOfList={props.index}
+              key={index}
+              indexOfCard={index}
+              content={todoItem}
+            />
+          ))}
+          {/* <hr/> */}
         </ul>
         <div ref={messagesEndRef} />
       </div>
